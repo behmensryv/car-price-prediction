@@ -29,30 +29,45 @@ The project includes:
 
 ## 📊 Features
 
-### 1. Filters
+1. Filters
 
-Users can filter automobiles by:
+Users can filter automobiles using advanced options:
+- Brand (Marka)
+- City (Şəhər)
+- Production year range (Buraxılış ili)
 
-- Brand
-- Production year
+2. Automobile Table
 
-### 2. Automobile Table
+The dashboard displays a comprehensive table with all dataset columns for the automobiles matching the selected filters:
+- Ad ID (Elan_id)
+- Brand & Model (Marka, Model)
+- Production Year & Car Age (Buraxılış_ili, Yaş)
+- Engine Size (Mühərrik_Həcmi) & Mileage (Yürüş_KM)
+- Fuel Type & Transmission (Yanacaq, Sürətlər_Qutusu)
+- Body Type & Color (Ban_novu, Rəng)
+- City (Şəhər)
+- Accident & Paint Status (Vuruq, Rənglənib)
+- Number of Owners (Sahib_sayi)
+- Ad Date & Price (Elan_Tarixi, Qiymət_AZN)
+- Price Category (Qiymət_Kateqoriyası)
 
-The dashboard displays automobiles matching the selected filters.
 
-### 3. Price Analysis
+3. Interactive Visual Analytics
 
-A chart shows the average automobile price by brand.
+Interactive Plotly charts provide deep insights into the filtered market data:
+- Scatter plot showing Automobile Age vs Price, colored by Accident Status.
+- Bar chart illustrating Average Price and Total Listing Count grouped by Color.
 
-### 4. Price Prediction
+4. Machine Learning Price Prediction
 
-Users can enter:
-
-- Production year
-- Engine size
-- Mileage
-
-The Linear Regression model then predicts the estimated automobile price.
+Users can input a complete set of vehicle specifications to receive a real-time price estimation powered by a trained **Random Forest Regression** model:
+- Brand & Model selection
+- Production Year (Automobile Age is automatically calculated)
+- Engine Size & Mileage
+- Fuel Type & Transmission
+- Body Type, Color, & City
+- Number of Owners
+- Accident & Paint condition status
 
 ## 📁 Project Structure
 
@@ -60,8 +75,16 @@ The Linear Regression model then predicts the estimated automobile price.
 car-price-prediction/
 │
 ├── app.py
+├── avtomobil_elanlari.csv
+├── seherler.csv
 ├── project.ipynb
 ├── avtomobil.db
 ├── requirements.txt
 ├── README.md
 └── .gitignore
+
+## 👨‍💻 Author
+
+Bəhmən Sarıyev
+
+Information Technologies @ ADA University

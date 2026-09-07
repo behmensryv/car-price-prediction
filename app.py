@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 from datetime import datetime
+import sqlite3  # <--- SQLite kitabxanası əlavə olundu
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
@@ -52,11 +53,15 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 2. MƏLUMATLARIN YÜKLƏNMƏSİ VƏ MODELİN TƏLİMİ
+# 2. MƏLUMATLARIN SQLITE BAZASINDAN YÜKLƏNMƏSİ VƏ MODELİN TƏLİMİ
 # ---------------------------------------------------------
 @st.cache_data
 def load_data():
-    df = pd.read_csv("avtomobil_temiz.csv")
+    # SQLite bazasına qoşulma və verilənlərin oxunması
+    conn = sqlite3.connect("avtomobil.db")
+    df = pd.read_sql_query("SELECT * FROM avtomobil_temiz", conn)
+    conn.close()
+    
     # Əgər 'Yaş' sütunu daxil edilməyibsə, avtomatik hesabla
     current_year = datetime.now().year
     if 'Yaş' not in df.columns or df['Yaş'].isnull().any():
@@ -119,9 +124,8 @@ if app_mode == "📊 Analitika & Filtrləmə":
     all_brands = ["Hamısı"] + sorted(df['Marka'].dropna().astype(str).unique().tolist())
     selected_brand = st.sidebar.selectbox("Marka", all_brands)
     
-
     # 6. Qiymət Kateqoriyası filtri
-    all_categories = ["Hamısı"] + sorted(df['Qiymət_Kateqoriyası'].dropna().astype(str).unique().tolist())
+    all_categories = ["Hamısı"] + sorted(df['Qiymət_Kateqoriyası'].dropna().astype(str).unique().tolist()) if 'Qiymət_Kateqoriyası' in df.columns else ["Hamısı"]
     selected_category = st.sidebar.selectbox("Qiymət Kateqoriyası", all_categories)
 
     # 7. İl aralığı filtri
@@ -133,7 +137,7 @@ if app_mode == "📊 Analitika & Filtrləmə":
     filtered_df = df.copy()
     if selected_brand != "Hamısı":
         filtered_df = filtered_df[filtered_df['Marka'] == selected_brand]
-    if selected_category != "Hamısı":
+    if selected_category != "Hamısı" and 'Qiymət_Kateqoriyası' in filtered_df.columns:
         filtered_df = filtered_df[filtered_df['Qiymət_Kateqoriyası'] == selected_category]
     
     filtered_df = filtered_df[
@@ -188,13 +192,17 @@ if app_mode == "📊 Analitika & Filtrləmə":
         with col_g2:
             st.markdown("##### 🎨 Rənglərə Görə Avtomobil Sayı və Orta Qiymət")
             if not filtered_df.empty:
-                color_df = filtered_df.groupby('Rəng').agg({'Qiymət_AZN': 'mean', 'Elan_id': 'count'}).reset_index()
+                # 'Elan_id' sütunu yoxdursa 'Qiymət_AZN' ilə say hesabla
+                count_col = 'Elan_id' if 'Elan_id' in filtered_df.columns else 'Qiymət_AZN'
+                color_df = filtered_df.groupby('Rəng').agg({'Qiymət_AZN': 'mean', count_col: 'count'}).reset_index()
+                color_df.rename(columns={count_col: 'Elan_Sayı'}, inplace=True)
+                
                 fig_bar = px.bar(
                     color_df, 
                     x='Rəng', 
                     y='Qiymət_AZN', 
                     color='Rəng',
-                    text='Elan_id',
+                    text='Elan_Sayı',
                     title="Rənglər üzrə Orta Qiymət və Elan Sayı"
                 )
                 fig_bar.update_layout(template="plotly_white", showlegend=False)
